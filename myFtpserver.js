@@ -17,7 +17,7 @@ const server = net.createServer((socket) => {
 //CREER DIR POUR SERVER + USER
 let pathDirUser=path.resolve('/ProjetFtp/Users')
 let pathDirServer=path.resolve('/ProjetFtp/Server')
-
+let filename,pathToFile,pathToDestination
 let pathDirFtp=path.resolve('/ProjetFtp')
   const createDir= (pathDir) => {fs.mkdir(pathDir,{recursive:true},(error)=>{
     if(error){
@@ -77,6 +77,11 @@ let pathDirFtp=path.resolve('/ProjetFtp')
       }
       return idx
     }
+    function callback(err) {
+      if (err) throw err;
+      console.log('File was copied');
+    }
+
     switch(directive) {
       case 'USER':
         if(tabUser.includes(parameter)==true){
@@ -158,7 +163,12 @@ let pathDirFtp=path.resolve('/ProjetFtp')
 
       case 'RETR':
         if (isConnected==true) {
-          
+          filename=parameter
+          pathToFile=path.join('P:\ProjetFtp\Server',filename)
+          pathToDestination=path.join(value,"copy",filename)
+          fs.copyFile(pathToFile,pathToDestination, callback);
+          socket.write(`file ${filename} copied`)
+          console.log(`file copied ${filename}`);
         }else{
           socket.write(`Vous êtes pas connecté`)
         }
@@ -166,7 +176,11 @@ let pathDirFtp=path.resolve('/ProjetFtp')
         
       case 'STOR':
         if (isConnected==true) {
-          
+          pathToFile=path.join(value,filename)
+          pathToDestination=path.join('P:\ProjetFtp\Server',"copy",filename)
+          fs.copyFile(pathToFile,pathToDestination, callback);
+          socket.write(`file ${filename} copied`)
+          console.log(`file copied ${filename}`);
         }else{
           socket.write(`Vous êtes pas connecté`)
         }
