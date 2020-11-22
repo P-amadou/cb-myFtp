@@ -10,6 +10,8 @@ let readDB,value
 let isValid=false;
 let isConnected=false;
 let connexion=0
+let port=process.argv[2]
+
 const server = net.createServer((socket) => {
 //CREER DIR POUR SERVER + USER
 let pathDirUser=path.resolve('/ProjetFtp/Users')
@@ -38,7 +40,7 @@ let pathDirFtp=path.resolve('/ProjetFtp')
   console.log('contenus readDB: '+readDB+' taille readDB: '+readDB.length);
 
 
-  let userPassMap = new Map();
+  //let userPassMap = new Map();
   let tabUser=[],tabPass=[]
 
   //J'ai recup du fic JSON les username et password et mis dans tab user pour i pair et tab pass pour i impair
@@ -70,7 +72,7 @@ let pathDirFtp=path.resolve('/ProjetFtp')
         user=parameter
         idx=tabUser.indexOf(user)
       }else{
-        console.log('ICI PB!!!!!');
+        console.log('Problem getUserPassIdx');
       }
       return idx
     }
@@ -213,6 +215,11 @@ let pathDirFtp=path.resolve('/ProjetFtp')
   //socket.write('Hello from server')
 })
 
-server.listen(5000, () => {
-  console.log('Server started at port 5000')
+server.listen(port, () => {
+  if (port==undefined) {
+    console.log(`Syntaxe: node myFtpserver.js <PORT>`);
+    server.close()
+  }else{
+    console.log(`Server started at port ${port}`)
+  }
 })
