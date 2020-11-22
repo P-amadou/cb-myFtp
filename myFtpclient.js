@@ -9,7 +9,6 @@ let host=process.argv[3]
 let port=process.argv[2]
 
   client.connect(port,host, () => {
-    console.log(`Rappel syntaxe: node myFtpserver.js <PORT> <HOST>`);
     console.log('connected')
     rl.on('line',(line)=>{
       client.write(line)
@@ -23,5 +22,6 @@ let port=process.argv[2]
     console.log(data.toString())
    
   })
-  
+  console.log(`Rappel syntaxe: node myFtpserver.js <PORT> <HOST>`);
+
 

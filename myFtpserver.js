@@ -1,6 +1,7 @@
 const net = require('net')
 const fs = require('fs')
 const path = require('path')
+const process=require('process')
 let filepath='./db.json'
 let regG=/"/g
 let regUser=/(username)/g
@@ -37,7 +38,7 @@ let pathDirFtp=path.resolve('/ProjetFtp')
   readDB=readDB.replace(regUser,'')
   readDB=readDB.replace(regPass,'')
   readDB=readDB.match(regAlnum)
-  console.log('contenus readDB: '+readDB+' taille readDB: '+readDB.length);
+  //console.log('contenus readDB: '+readDB+' taille readDB: '+readDB.length);
 
 
   //let userPassMap = new Map();
@@ -67,7 +68,7 @@ let pathDirFtp=path.resolve('/ProjetFtp')
     let tab=[]
     function getUserPassIdx() {
       let idx
-      console.log("PARAM: "+parameter);
+      //console.log("PARAM: "+parameter);
       if(tabUser.includes(parameter)==true||tabPass.includes(parameter)==true){
         user=parameter
         idx=tabUser.indexOf(user)
@@ -81,7 +82,7 @@ let pathDirFtp=path.resolve('/ProjetFtp')
         if(tabUser.includes(parameter)==true){
 
         //console.log('User: '+user);
-        console.log('index user '+getUserPassIdx());
+        //console.log('index user '+getUserPassIdx());
         socket.write(`user: ${parameter} reconnu`)
         isValid=true
         socket.write(`Saisis ton mot de passe`)
@@ -90,18 +91,18 @@ let pathDirFtp=path.resolve('/ProjetFtp')
         }
         break;
       case 'PASS':
-        console.log('index pass '+tabPass.indexOf(parameter));
-        console.log('index user '+getUserPassIdx());
+        //console.log('index pass '+tabPass.indexOf(parameter));
+        //console.log('index user '+getUserPassIdx());
         //console.log('tab: '+tab);
         
         if (tabPass.includes(parameter)==true&&isValid==true) {
           //console.log('param'+parameter+' User: '+user);
           for (let j = 0; j < tabUser.length; j++) {
-            console.log(`Index:${j} tab user: ${tabUser[j]} et tabPass: ${tabPass[j]}`)//Parcours tab user et tab pass et affiche res
+            //console.log(`Index:${j} tab user: ${tabUser[j]} et tabPass: ${tabPass[j]}`) Parcours tab user et tab pass et affiche res
             if(getUserPassIdx()==tabUser.indexOf(parameter)||getUserPassIdx()==tabPass.indexOf(parameter)){
               isConnected=true
               parameter=tabUser[j]
-              console.log('value param: '+parameter);
+              //console.log('value param: '+parameter);
             }
           }
           socket.write(`password validé`)
@@ -110,7 +111,7 @@ let pathDirFtp=path.resolve('/ProjetFtp')
           console.log(`NB connexion:${connexion}`);
           tab.push(path.join(pathDirUser,parameter))
           value=path.join(pathDirUser,parameter)
-          console.log('tab: '+tab+' value: '+value);
+          //console.log('tab: '+tab+' value: '+value);
           createDir(path.join(pathDirUser,parameter))
         }else{
           socket.write(`password pas reconnu ou vous n'avez pas saisie le username`)
@@ -118,32 +119,54 @@ let pathDirFtp=path.resolve('/ProjetFtp')
         }
         break;
 
+        case 'LIST':
+          if (isConnected==true) {
+            //UTILISER DIR CREE
+          console.log('tab:'+value);
+          let files=fs.readdirSync(value)
+          console.log(process.cwd());
+           files.forEach(file => {
+            socket.write(`\n${file}`)
+           });
+            console.log(`Contenu Current Dir affiché au client`);
+          }else{
+            socket.write(`Vous êtes pas connecté`)
+          }
+          break;
+  
       case 'CWD':
-        if (isConnected==true&&parameter) {
-          let newWorkingDir=path.resolve(parameter)
-          
-          if (newWorkingDir) {
-            
+        if (isConnected==true) {
+          let newWorkingDir=parameter
+          console.log(`Starting directory: ${process.cwd()}`);
+          try {
+            process.chdir(newWorkingDir);
+            console.log(`New directory: ${process.cwd()}`);
+          } catch (err) {
+            console.error(`chdir: ${err}`);
           }
           /*socket.cwd(newWorkingDir,(error)=>{
             if(error){
               console.error('An error occured: ',error);
             }*/
+
           socket.write(`Directory changé pour : ${newWorkingDir}`)
           console.log('CWD : '+newWorkingDir);
+        }else{
+          socket.write(`Vous êtes pas connecté`)
         }
         break;
 
-      case 'LIST':
+      case 'RETR':
         if (isConnected==true) {
-          //UTILISER DIR CREE
-        console.log('tab:'+value);
-        let files=fs.readdirSync(value)
-        console.log(process.cwd());
-         files.forEach(file => {
-          socket.write(`\n${file}`)
-         });
-          console.log(`Contenu Current Dir affiché au client`);
+          
+        }else{
+          socket.write(`Vous êtes pas connecté`)
+        }
+        break;
+        
+      case 'STOR':
+        if (isConnected==true) {
+          
         }else{
           socket.write(`Vous êtes pas connecté`)
         }
